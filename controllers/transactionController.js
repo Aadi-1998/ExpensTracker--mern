@@ -21,13 +21,16 @@ const getAllTransaction = async(req,res)=>{
             }
             
             ),
-            userid: req.body.userid,
+            userid: req.userid,
+            
             ...(type !== 'all' && {type})
 
 
         })
-        res.status(201).send(transactions); 
-        
+res.status(201).json({
+    message: "Got data successfully",
+    transactions
+});        
     } catch (error) {
         console.log(error)
         res.status(500).json(error)
@@ -37,7 +40,11 @@ const getAllTransaction = async(req,res)=>{
 
 const addTransaction = async(req,res)=>{
     try {
-        const newTransactions = new transactionModel(req.body)
+        console.log(req.body)
+        const newTransactions = new transactionModel({...req.body,
+            userid:req.userid}
+        )
+        console.log(newTransactions)
         await newTransactions.save()
         res.status(201).send('Transaction added')
 
@@ -64,7 +71,7 @@ const editTransaction = async(req,res)=>{
 }
 const deleteTransaction = async(req,res)=>{
     try {
-        await transactionModel.findByIdAndDelete({_id:req.body.transactionId})
+        await transactionModel.findOneAndDelete({_id:req.body.transactionId})
         res.status(200).send('Deleted')
         
     } catch (error) {
@@ -73,4 +80,22 @@ const deleteTransaction = async(req,res)=>{
         
     }
 }
-module.exports= {getAllTransaction,addTransaction,editTransaction,deleteTransaction}
+const getAllTran= async( req,res)=>{
+  try {
+    
+    const allTransaction =  await transactionModel.find()
+res.status(201).json({
+  success:true,
+  allTransaction:  allTransaction[1].amount
+})
+  } catch (error) {
+    res.status(401).json({
+      success: false,
+      error
+    })
+    
+  }
+
+
+}
+module.exports= {getAllTransaction,addTransaction,editTransaction,deleteTransaction,getAllTran}

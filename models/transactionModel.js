@@ -4,21 +4,21 @@ const transactionSchema = new mongoose.Schema({
 
     userid:{
         type:String,
-        require:true
+        required:true
     },
     amount:{
         type:Number,
-        require:[true,"amount is required"]
+        required:[true,"amount is required"]
     },
 
     type:{
         type:String,
-        require:[true,'Type is required']
+        required:[true,'Type is required']
 
     },
     category:{
         type:String,
-        require:[
+        required:[
             true,"category is required"
         ]
     },
@@ -27,14 +27,14 @@ const transactionSchema = new mongoose.Schema({
     },
     description:{
         type:String,
-        required:[true,'description ']
+        required:[true,'description']
     },
     date:{
         type:Date,
         required:[true,"data is required"]
     }
 
-},{timeStamp:true})
+},{timestamps:true})
 
 const transactionModel = mongoose.model('transactions',transactionSchema);
 
