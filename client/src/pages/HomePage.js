@@ -12,7 +12,7 @@ import {
 } from "@ant-design/icons";
 import moment from "moment";
 import Analytics from "../components/Analytics";
-import { delData } from "../context/ContextProvider";
+// import { delData } from "../context/ContextProvider";
 
 const { RangePicker } = DatePicker;
 
@@ -32,7 +32,7 @@ const HomePage = () => {
   const [viewData, setViewData] = useState("table");
   const [editable, setEditable] = useState(null);
   // const setDelData =useContext(delData)
-  const [delData, setDelData] = useState("");
+  // const [delData, setDelData] = useState([]);
 
   // const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
 
@@ -86,7 +86,11 @@ const HomePage = () => {
   // useEffect  hook
 
   useEffect(() => {
-    const getAllTransaction = async () => {
+    
+    getAllTransaction();
+  }, [frequency, selectedDate, type]);
+
+  const getAllTransaction = async () => {
       try {
         // const user = JSON.parse(sessionStorage.getItem("token"));
 
@@ -108,37 +112,43 @@ const HomePage = () => {
             },
           },
         );
-        setLoading(false);
         setAllTransaction(res.data.transactions);
         console.log(res.data);
       } catch (error) {
         console.log(error);
         message.error("fetch issue with transaction");
+      }finally{
+                setLoading(false);
+
       }
     };
-    getAllTransaction();
-  }, [frequency, selectedDate, type]);
-
   // delete handler
 
   const handleDelete = async (record) => {
+    const token = sessionStorage.getItem("token");
+
     try {
       setLoading(true);
-      const res = await axios.post("/transactions/deleteTransaction", {
-        transactionId: record._id,
-      });
-      setLoading(false);
+      const res = await axios.post(
+        "/transactions/deleteTransaction",
+        {
+          transactionId: record._id,
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
       // forceUpdate();
       // window.location.reload(false);
-      setDelData(res);
+      // setDelData(res);
+      await getAllTransaction()
       message.success("transaction deleted");
     } catch (error) {
-      setLoading(false);
       console.log(error);
       message.error("unable to delete");
+    } finally {
+      setLoading(false);
     }
   };
-  //for handling
+  //for handling submit 
   const handleSubmit = async (values) => {
     try {
       // const user = JSON.parse(sessionStorage.getItem("user"));
@@ -159,13 +169,13 @@ const HomePage = () => {
         setLoading(false);
         // window.location.reload(false);
 
+        await getAllTransaction();
         message.success("transaction updated successfully");
       } else {
         await axios.post(
           "/transactions/addTransaction",
-          
-             values
-          ,
+
+          values,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -173,6 +183,7 @@ const HomePage = () => {
           },
         );
         setLoading(false);
+        await getAllTransaction()
 
         message.success("transaction added successfully");
         // window.location.reload(false);
